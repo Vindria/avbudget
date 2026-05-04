@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Servicios AV</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --border: #2a2a38;
+    --accent: #fd2c75;
+    --accent2: #47ffe8;
+    --accent3: #ff4766;
+    --text: #f0f0f8;
+    --muted: #6b6b80;
+    --success: #47e8a0;
+    --font-head: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+  }
+
+  .logo-text {
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text span { color: var(--accent); }
+
+  .header-tag {
+    font-size: 0.7rem;
+    background: var(--accent);
+    color: #000;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    padding: 0 2rem;
+    overflow-x: auto;
+    gap: 0;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-icon { font-size: 1rem; }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+    flex: 1;
+  }
+
+  .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+  .tab-panel.active { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .section-header-right { display: flex; gap: 0.75rem; }
+
+  .section-title {
+    font-family: var(--font-head);
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .section-title .accent { color: var(--accent); }
+  .section-desc { color: var(--muted); font-size: 0.75rem; margin-top: 0.5rem; letter-spacing: 0.5px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+
+  @media (max-width: 700px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    main { padding: 1rem; }
+    .tabs { padding: 0 1rem; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: #3a3a50; }
+
+  .card-title {
+    font-family: var(--font-head);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .card-title::before {
+    content: '';
+    width: 3px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .field { margin-bottom: 1rem; }
+  .field label {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .field input, .field select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.9rem;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+
+  .role-table { width: 100%; border-collapse: collapse; }
+  .role-table th {
+    text-align: left;
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 0 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .role-table td { padding: 0.5rem 0.6rem; font-size: 0.82rem; }
+  .role-table tr:not(:last-child) td { border-bottom: 1px solid #1e1e2a; }
+  .role-table input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.35rem 0.6rem;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    width: 100%;
+    outline: none;
+  }
+  .role-check { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+
+  .equip-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #1e1e2a;
+    font-size: 0.82rem;
+  }
+  .equip-row:last-child { border-bottom: none; }
+  .equip-row input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.3rem 0.5rem;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    width: 80px;
+    text-align: right;
+  }
+  .equip-total { font-size: 0.8rem; color: var(--accent2); text-align: right; min-width: 80px; }
+
+  .summary-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .summary-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.83rem;
+    border-bottom: 1px solid #1e1e2a;
+  }
+  .summary-line:last-child { border-bottom: none; }
+  .summary-line.total {
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .summary-line.total .value {
+    font-family: var(--font-head);
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid #1e1e2a;
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle {
+    position: relative;
+    width: 44px; height: 24px;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 24px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .slider::before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .toggle input:checked + .slider { background: var(--accent); }
+  .toggle input:checked + .slider::before { transform: translateX(20px); background: #000; }
+
+  .grand-total-card {
+    background: linear-gradient(135deg, #0f1a00, #1a2600);
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    margin-top: 2rem;
+  }
+  .grand-total-amount {
+    font-family: var(--font-head);
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.3rem;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #d4eb3c; transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: #3a3a50; }
+
+  .preset-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .preset-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.35rem 1rem;
+    cursor: pointer;
+  }
+  .preset-btn:hover, .preset-btn.active { background: var(--accent); border-color: var(--accent); color: #000; }
+
+  .service-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+  }
+  .badge-video { background: rgba(232,255,71,0.15); color: var(--accent); }
+  .badge-foto { background: rgba(71,255,232,0.15); color: var(--accent2); }
+  .badge-stream { background: rgba(255,71,102,0.15); color: var(--accent3); }
+
+  .wear-bar-bg {
+    background: var(--surface2);
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+  }
+  .wear-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+  }
+
+  .notif {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--success);
+    color: #000;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 999;
+  }
+  .notif.show { transform: translateY(0); opacity: 1; }
+
+  .range-wrap { display: flex; align-items: center; gap: 1rem; }
+  .range-wrap input[type="range"] { flex: 1; accent-color: var(--accent); }
+
+  .profit-indicator {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    margin-top: 1rem;
+  }
+  .profit-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .profit-ok { background: var(--success); }
+  .profit-warn { background: var(--accent); }
+  .profit-bad { background: var(--accent3); }
+
+  .cliente-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 500px) {
+    .cliente-grid { grid-template-columns: 1fr; }
+    .grand-total-amount { font-size: 2rem; }
+  }
+  
+  .footer-credit {
+    margin: 2rem auto 1rem auto;
+    max-width: 1100px;
+    padding: 0.75rem 1.5rem;
+    text-align: center;
+    border-radius: 8px;
+    background: var(--surface2);
+    border-top: 1px solid var(--accent);
+    border-bottom: 1px solid var(--accent);
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+  .footer-credit strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🎬</div>
+    <div>
+      <div class="logo-text">AV<span>Budget</span></div>
+      <div style="font-size:0.65rem;color:var(--muted);margin-top:2px;">Calculadora Gratuita de Servicios Profesionales</div>
+    </div>
+  </div>
+  <span class="header-tag">v2.0</span>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('cliente')" id="tab-cliente"><span class="tab-icon">🏢</span> Cliente</button>
+  <button class="tab-btn" onclick="showTab('video')" id="tab-video"><span class="tab-icon">🎥</span> Video</button>
+  <button class="tab-btn" onclick="showTab('foto')" id="tab-foto"><span class="tab-icon">📷</span> Fotografía</button>
+  <button class="tab-btn" onclick="showTab('stream')" id="tab-stream"><span class="tab-icon">📡</span> Streaming</button>
+  <button class="tab-btn" onclick="showTab('equipo')" id="tab-equipo"><span class="tab-icon">🎛️</span> Equipos</button>
+  <button class="tab-btn" onclick="showTab('resumen')" id="tab-resumen"><span class="tab-icon">💰</span> Resumen</button>
+</div>
+
+<main>
+  <!-- CLIENTE -->
+  <div class="tab-panel active" id="panel-cliente">
+    <div class="section-header">
+      <div><div class="section-title">Datos del <span class="accent">Cliente</span></div><div class="section-desc">Información general del proyecto y presupuesto</div></div>
+      <div class="section-header-right"><button class="btn btn-ghost" onclick="limpiarTodo()">↺ Limpiar todo</button></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div class="card-title">Información del cliente</div>
+        <div class="cliente-grid">
+          <div class="field"><label>Nombre / Empresa</label><input type="text" id="cli-nombre" placeholder="Ej. Grupo Meridian" oninput="recalcular()"></div>
+          <div class="field"><label>Evento</label><input type="text" id="cli-evento" placeholder="Ej. Congreso Anual 2025" oninput="recalcular()"></div>
+          <div class="field"><label>Fecha del evento</label><input type="date" id="cli-fecha" oninput="recalcular()"></div>
+          <div class="field"><label>Lugar</label><input type="text" id="cli-lugar" placeholder="Ciudad, Venue" oninput="recalcular()"></div>
+          <div class="field" style="grid-column:1/-1"><label>Notas / Observaciones</label><input type="text" id="cli-notas" placeholder="Requisitos especiales, aclaraciones..." oninput="recalcular()"></div>
+        </div>
+      </div>
+      <div class="card"><div class="card-title">Parámetros globales</div>
+        <div class="field"><label>Salario mínimo diario (MXN)</label><input type="number" id="salario-min" value="315.04" step="0.01" oninput="recalcular()"></div>
+        <div class="field"><label>Horas por jornada</label><input type="number" id="horas-jornada" value="8" oninput="recalcular()"></div>
+        <div class="field" style="margin-top:0.5rem">
+          <label>Régimen fiscal</label>
+          <select id="regimen-fiscal" onchange="cambiarRegimen()">
+            <option value="general">General (IVA 16% + ISR 10%)</option>
+            <option value="resico">RESICO (IVA 16% + ISR 1-2.5%)</option>
+            <option value="exento">Exento (Sin impuestos)</option>
+            <option value="soloiva">Solo IVA (16%)</option>
+            <option value="personalizado">Personalizado</option>
+          </select>
+        </div>
+        <div id="impuestos-personalizados" style="display:none;">
+          <div class="grid-2" style="gap:0.8rem; margin-top:0.5rem">
+            <div class="field"><label>IVA (%)</label><input type="number" id="iva-porcentaje" value="16" min="0" max="100" step="0.5" oninput="recalcular()"></div>
+            <div class="field"><label>ISR (%)</label><input type="number" id="isr-porcentaje" value="10" min="0" max="35" step="0.5" oninput="recalcular()"></div>
+          </div>
+        </div>
+        <div class="field" style="margin-top:1rem"><label>Contingencia</label><div class="range-wrap"><input type="range" id="contingencia" min="0" max="30" value="10" oninput="updCont(this)"><span class="range-val" id="cont-val">10%</span></div></div>
+        <div class="field"><label>Margen de ganancia (%)</label><input type="number" id="margen-ganancia" value="30" min="0" max="200" oninput="recalcular()"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1.5rem"><div class="card-title">Servicios incluidos en este presupuesto</div>
+      <div class="grid-3">
+        <div class="toggle-row"><div><div class="toggle-label">🎥 Video / Producción</div><div class="toggle-sub">Rodaje, edición y entrega</div></div><label class="toggle"><input type="checkbox" id="incl-video" checked onchange="recalcular()"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div><div class="toggle-label">📷 Fotografía</div><div class="toggle-sub">Cobertura y edición de imágenes</div></div><label class="toggle"><input type="checkbox" id="incl-foto" checked onchange="recalcular()"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div><div class="toggle-label">📡 Streaming en vivo</div><div class="toggle-sub">Transmisión y cobertura audiovisual</div></div><label class="toggle"><input type="checkbox" id="incl-stream" checked onchange="recalcular()"><span class="slider"></span></label></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIDEO -->
+  <div class="tab-panel" id="panel-video">
+    <div class="section-header"><div><div class="section-title">Producción de <span class="accent">Video</span></div><div class="section-desc">Configuración de roles, tipo de video y equipo</div></div><div class="section-header-right"><button class="btn btn-ghost" onclick="limpiarVideo()">↺ Limpiar todo</button></div></div>
+    <div class="preset-row"><span style="font-size:0.72rem;color:var(--muted);align-self:center;text-transform:uppercase;letter-spacing:0.5px">Presets:</span>
+      <button class="preset-btn" onclick="presetVideo('clip')">Clip Redes</button><button class="preset-btn" onclick="presetVideo('entrevista')">Entrevista</button><button class="preset-btn active" onclick="presetVideo('institucional')">Institucional</button>
+      <button class="preset-btn" onclick="presetVideo('documental')">Mini Documental</button><button class="preset-btn" onclick="presetVideo('custom')">Personalizado</button>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div class="card-title">Tipo de video</div><div class="field"><label>Tipo</label><select id="v-tipo" onchange="actualizarTipoVideo()"><option value="clip">Clip para redes (1 min)</option><option value="entrevista">Entrevista (3 min)</option><option value="institucional" selected>Video institucional (4 min)</option><option value="documental">Mini documental (6 min)</option><option value="custom">Personalizado</option></select></div>
+        <div class="field"><label>Duración estimada (min)</label><input type="number" id="v-duracion" value="4" oninput="recalcular()"></div>
+        <div class="grid-2" style="gap:0.8rem"><div class="field"><label>Horas de rodaje</label><input type="number" id="v-rodaje" value="6" step="0.5" oninput="recalcular()"></div><div class="field"><label>Horas de edición</label><input type="number" id="v-edicion" value="21" step="0.5" oninput="recalcular()"></div></div>
+        <div class="field"><label>Días de producción</label><input type="number" id="v-dias" value="1" min="0" oninput="recalcular()"></div>
+      </div>
+      <div class="card"><div class="card-title">Personal / Roles</div><table class="role-table"><thead><tr><th style="width:20px"></th><th>Rol</th><th style="width:70px">Hrs</th><th style="width:70px">Personas</th><th style="width:90px">$/hr</th></tr></thead><tbody id="roles-video"></tbody></table></div>
+    </div>
+    <div class="summary-box"><div class="card-title">Resumen Video</div><div class="summary-line"><span class="label">Costo personal</span><span class="value" id="v-costo-personal">$0</span></div><div class="summary-line"><span class="label">Costo equipo</span><span class="value" id="v-costo-equipo">$0</span></div><div class="summary-line"><span class="label">Contingencia</span><span class="value" id="v-contingencia">$0</span></div><div class="summary-line"><span class="label">Margen de ganancia</span><span class="value" id="v-ganancia">$0</span></div><div class="summary-line total"><span class="label">Total Video</span><span class="value" id="v-total">$0</span></div></div>
+  </div>
+
+  <!-- FOTOGRAFÍA -->
+  <div class="tab-panel" id="panel-foto">
+    <div class="section-header"><div><div class="section-title">Servicio de <span class="accent">Fotografía</span></div></div><div class="section-header-right"><button class="btn btn-ghost" onclick="limpiarFoto()">↺ Limpiar todo</button></div></div>
+    <div class="preset-row"><span style="font-size:0.72rem;color:var(--muted);align-self:center;text-transform:uppercase;letter-spacing:0.5px">Presets:</span>
+      <button class="preset-btn" onclick="presetFoto('corta')">Sesión Corta</button><button class="preset-btn active" onclick="presetFoto('evento')">Cobertura Evento</button>
+      <button class="preset-btn" onclick="presetFoto('completo')">Evento Completo</button><button class="preset-btn" onclick="presetFoto('custom')">Personalizado</button>
+    </div>
+    <div class="grid-2"><div class="card"><div class="card-title">Configuración</div><div class="field"><label>Tipo de sesión</label><select id="f-tipo" onchange="actualizarTipoFoto()"><option value="corta">Sesión corta (1 hr)</option><option value="evento" selected>Cobertura evento (4 hrs)</option><option value="completo">Evento completo (8 hrs)</option><option value="custom">Personalizado</option></select></div>
+      <div class="grid-2" style="gap:0.8rem"><div class="field"><label>Horas de sesión</label><input type="number" id="f-horas" value="4" step="0.5" oninput="recalcular()"></div><div class="field"><label>Horas de edición</label><input type="number" id="f-edicion" value="12" step="0.5" oninput="recalcular()"></div></div>
+      <div class="field"><label>Días de trabajo</label><input type="number" id="f-dias" value="1" min="0" oninput="recalcular()"></div><div class="field"><label>Entregables estimados (fotos)</label><input type="number" id="f-fotos" value="200" oninput="recalcular()"></div>
+      </div><div class="card"><div class="card-title">Personal</div><table class="role-table"><thead><tr><th style="width:20px"></th><th>Rol</th><th style="width:70px">Hrs</th><th style="width:70px">Personas</th><th style="width:90px">$/hr</th></tr></thead><tbody id="roles-foto"></tbody></table></div>
+    </div>
+    <div class="summary-box"><div class="card-title">Resumen Fotografía</div><div class="summary-line"><span class="label">Costo personal</span><span class="value" id="f-costo-personal">$0</span></div><div class="summary-line"><span class="label">Costo equipo</span><span class="value" id="f-costo-equipo">$0</span></div><div class="summary-line"><span class="label">Contingencia</span><span class="value" id="f-contingencia">$0</span></div><div class="summary-line"><span class="label">Margen de ganancia</span><span class="value" id="f-ganancia">$0</span></div><div class="summary-line total"><span class="label">Total Fotografía</span><span class="value" id="f-total">$0</span></div></div>
+  </div>
+
+  <!-- STREAMING -->
+  <div class="tab-panel" id="panel-stream">
+    <div class="section-header"><div><div class="section-title">Transmisión en <span class="accent">Vivo</span></div><div class="section-desc">Live streaming y cobertura audiovisual de eventos</div></div><div class="section-header-right"><button class="btn btn-ghost" onclick="limpiarStream()">↺ Limpiar todo</button></div></div>
+    <div class="grid-2"><div class="card"><div class="card-title">Configuración del evento</div><div class="field"><label>Duración del stream (hrs)</label><input type="number" id="s-duracion" value="10" step="0.5" oninput="recalcular()"></div><div class="field"><label>Plataformas de transmisión</label><select id="s-plataformas" onchange="recalcular()"><option value="1">1 plataforma</option><option value="2">2 plataformas (+15%)</option><option value="3">3+ plataformas (+30%)</option></select></div>
+      <div class="field"><label>Número de cámaras</label><input type="number" id="s-camaras" value="2" min="0" max="6" oninput="recalcular()"></div>
+      <div class="toggle-row" style="margin-top:0.5rem"><div><div class="toggle-label">Grabación para archivo</div><div class="toggle-sub">Entrega de video grabado (+10%)</div></div><label class="toggle"><input type="checkbox" id="s-grabacion" onchange="recalcular()"><span class="slider"></span></label></div>
+      <div class="toggle-row"><div><div class="toggle-label">Switcher de producción</div><div class="toggle-sub">ATEM o similar (+15%)</div></div><label class="toggle"><input type="checkbox" id="s-switcher" checked onchange="recalcular()"><span class="slider"></span></label></div>
+      <div class="field" style="margin-top:0.5rem"><label>Costo base de producción (MXN)</label><input type="number" id="s-base" value="15000" oninput="recalcular()"></div>
+      </div><div class="card"><div class="card-title">Personal</div><table class="role-table"><thead><tr><th style="width:20px"></th><th>Rol</th><th style="width:70px">Hrs</th><th style="width:70px">Personas</th><th style="width:90px">$/hr</th></tr></thead><tbody id="roles-stream"></tbody></table></div>
+    </div>
+    <div class="summary-box"><div class="card-title">Resumen Streaming</div><div class="summary-line"><span class="label">Costo personal</span><span class="value" id="s-costo-personal">$0</span></div><div class="summary-line"><span class="label">Costo equipo</span><span class="value" id="s-costo-equipo">$0</span></div><div class="summary-line"><span class="label">Costo base producción</span><span class="value" id="s-base-display">$0</span></div><div class="summary-line"><span class="label">Contingencia</span><span class="value" id="s-contingencia">$0</span></div><div class="summary-line"><span class="label">Margen de ganancia</span><span class="value" id="s-ganancia">$0</span></div><div class="summary-line total"><span class="label">Total Streaming</span><span class="value" id="s-total">$0</span></div></div>
+  </div>
+
+  <!-- EQUIPOS -->
+  <div class="tab-panel" id="panel-equipo">
+    <div class="section-header"><div><div class="section-title">Inventario de <span class="accent">Equipos</span></div><div class="section-desc">Costo diario, desgaste y depreciación por servicio</div></div><div class="section-header-right"><button class="btn btn-ghost" onclick="limpiarEquipos()">↺ Limpiar todo</button></div></div>
+    <div class="grid-3" id="equipo-cards"></div>
+    <div class="card" style="margin-top:1.5rem"><div class="card-title">Desgaste y depreciación estimada</div><div id="wear-list"></div></div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="tab-panel" id="panel-resumen">
+    <div class="section-header"><div><div class="section-title">Presupuesto <span class="accent">Final</span></div><div class="section-desc">Resumen ejecutivo y exportación</div></div><div class="section-header-right"><button class="btn btn-ghost" onclick="limpiarTodo()">↺ Limpiar cliente</button><button class="btn btn-primary" onclick="exportarTXT()">⬇ Descargar Presupuesto</button></div></div>
+    <div id="servicios-activos"></div>
+    <div class="grid-2" style="margin-top:1.5rem"><div class="card"><div class="card-title">Desglose de impuestos y márgenes</div><div class="summary-line"><span class="label">Subtotal servicios</span><span class="value" id="r-subtotal">$0</span></div><div class="summary-line"><span class="label">Contingencia total</span><span class="value" id="r-contingencia">$0</span></div><div class="summary-line"><span class="label">Margen de ganancia</span><span class="value" id="r-ganancia-total">$0</span></div><div class="summary-line"><span class="label">Subtotal antes de impuestos</span><span class="value" id="r-antes-imp">$0</span></div><div class="summary-line"><span class="label" id="r-iva-label">IVA (16%)</span><span class="value" id="r-iva">$0</span></div><div class="summary-line"><span class="label" id="r-isr-label">ISR (10%)</span><span class="value" id="r-isr">$0</span></div></div><div class="card"><div class="card-title">Análisis de rentabilidad</div><div id="profit-analysis"></div></div></div>
+    
+    <!-- Control de Impuestos en Resumen -->
+    <div class="card" style="margin-top:1.5rem">
+      <div class="card-title">⚙️ Configurar Impuestos</div>
+      <div class="grid-2">
+        <div class="field">
+          <label>IVA (%)</label>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="number" id="resumen-iva-pct" value="16" min="0" max="100" step="1" style="width: 80px;" oninput="recalcular()">
+            <label class="toggle" style="margin-left: auto;">
+              <input type="checkbox" id="resumen-iva-activo" checked onchange="toggleImpuesto('iva')">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="toggle-sub">Activar/Desactivar IVA</div>
+        </div>
+        <div class="field">
+          <label>ISR (%)</label>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="number" id="resumen-isr-pct" value="10" min="0" max="35" step="1" style="width: 80px;" oninput="recalcular()">
+            <label class="toggle" style="margin-left: auto;">
+              <input type="checkbox" id="resumen-isr-activo" checked onchange="toggleImpuesto('isr')">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="toggle-sub">Activar/Desactivar ISR</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="grand-total-card"><div class="grand-total-label">Total del presupuesto</div><div class="grand-total-amount" id="grand-total">$0.00</div><div class="grand-total-sub" id="grand-total-sub">MXN</div></div>
+  </div>
+</main>
+
+<div class="notif" id="notif">✓ Presupuesto exportado correctamente</div>
+
+<!-- FOOTER: ATRIBUCIÓN GRATUITA -->
+<div class="footer-credit">
+  🎬 <strong>AVBudget</strong> — Herramienta gratuita, creada por <strong>Vindria</strong> para todos los profesionales y emprendedores que lo necesiten. Úsala, compártela y cotiza sin límites. ✨
+</div>
+
+<script>
+// ========== STATE & MULTIPLIERS ==========
+const state = {
+  salarioMin: 315.04, horasJornada: 8, contingencia: 10, margen: 30,
+  vTipo: 'institucional', vDuracion: 4, vRodaje: 6, vEdicion: 21, vDias: 1,
+  rolesVideo: [
+    { nombre: 'Director',      horas: 105,  costoHr: null, personas: 1, activo: true },
+    { nombre: 'Productor',     horas: 63,   costoHr: null, personas: 2, activo: true },
+    { nombre: 'Camarógrafo',   horas: 21,   costoHr: null, personas: 1, activo: true },
+    { nombre: 'Sonidista',     horas: 21,   costoHr: null, personas: 4, activo: true },
+    { nombre: 'Editor',        horas: 73.5, costoHr: null, personas: 1, activo: true },
+    { nombre: 'Asistente',     horas: 10.5, costoHr: null, personas: 1, activo: false },
+  ],
+  fTipo: 'evento', fHoras: 4, fEdicion: 12, fDias: 1, fFotos: 200,
+  rolesFoto: [
+    { nombre: 'Director',    horas: 4,  costoHr: null, personas: 1, activo: true },
+    { nombre: 'Fotógrafo',   horas: 4,  costoHr: null, personas: 1, activo: true },
+    { nombre: 'Retocador',   horas: 12, costoHr: null, personas: 1, activo: true },
+    { nombre: 'Asistente',   horas: 4,  costoHr: null, personas: 1, activo: false },
+  ],
+  sDuracion: 10, sPlataformas: 1, sCamaras: 2, sGrabacion: false, sSwitcher: true, sBase: 15000,
+  rolesStream: [
+    { nombre: 'Director',    horas: 10, costoHr: null, personas: 1, activo: true },
+    { nombre: 'Productor',   horas: 10, costoHr: null, personas: 1, activo: true },
+    { nombre: 'Camarógrafo', horas: 10, costoHr: null, personas: 2, activo: true },
+    { nombre: 'Sonidista',   horas: 10, costoHr: null, personas: 1, activo: true },
+    { nombre: 'Switcher',    horas: 10, costoHr: null, personas: 1, activo: true },
+    { nombre: 'Asistente',   horas: 4,  costoHr: null, personas: 2, activo: false },
+  ],
+  equipoVideo: [ { nombre: 'Cámara', costoDia: 1200, dias: 1, vidaUtil: 5 }, { nombre: 'Tripié', costoDia: 200, dias: 1, vidaUtil: 7 }, { nombre: 'Micrófono', costoDia: 300, dias: 1, vidaUtil: 6 }, { nombre: 'Grabadora', costoDia: 250, dias: 1, vidaUtil: 6 }, { nombre: 'Luces', costoDia: 500, dias: 1, vidaUtil: 5 }, { nombre: 'Laptop edición', costoDia: 400, dias: 1, vidaUtil: 4 } ],
+  equipoFoto: [ { nombre: 'Cámara', costoDia: 1200, dias: 1, vidaUtil: 5 }, { nombre: 'Tripié', costoDia: 200, dias: 1, vidaUtil: 7 }, { nombre: 'Luces', costoDia: 500, dias: 1, vidaUtil: 5 }, { nombre: 'Laptop edición', costoDia: 400, dias: 1, vidaUtil: 4 } ],
+  equipoStream: [ { nombre: 'Cámara(s)', costoDia: 1200, dias: 1, vidaUtil: 5 }, { nombre: 'Tripié', costoDia: 200, dias: 1, vidaUtil: 7 }, { nombre: 'Micrófono', costoDia: 500, dias: 1, vidaUtil: 6 }, { nombre: 'Sistema Audio', costoDia: 400, dias: 1, vidaUtil: 5 }, { nombre: 'Laptop Stream', costoDia: 1500, dias: 1, vidaUtil: 3 }, { nombre: 'Switcher ATEM', costoDia: 800, dias: 1, vidaUtil: 4 } ],
+};
+
+const MULT = { 'Director':10.5, 'Productor':6.3, 'Camarógrafo':2.1, 'Sonidista':2.1, 'Editor':7.35, 'Asistente':1.05, 'Fotógrafo':3, 'Retocador':2.5, 'Switcher':4 };
+function costoHoraPorRol(nombre) { return +((state.salarioMin / state.horasJornada) * (MULT[nombre] || 2.1)).toFixed(2); }
+
+function setVal(id,v) { const el = document.getElementById(id); if(el) el.value = v; }
+function getVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+function getNum(id) { const el = document.getElementById(id); return el ? +el.value || 0 : 0; }
+function getCheck(id) { const el = document.getElementById(id); return el ? el.checked : false; }
+function fmt(n) { return '$' + (n || 0).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function updCont(el) { document.getElementById('cont-val').textContent = el.value + '%'; recalcular(); }
+
+function showTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+  recalcular();
+}
+
+function renderRoles(cid, roles) {
+  const tbody = document.getElementById(cid);
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  roles.forEach((r, i) => {
+    const hr = costoHoraPorRol(r.nombre);
+    tbody.innerHTML += `<tr>
+      <td><input type="checkbox" class="role-check" ${r.activo ? 'checked' : ''} onchange="toggleRole('${cid}',${i},this.checked)"></td>
+      <td style="color:${r.activo ? 'var(--text)' : 'var(--muted)'}">${r.nombre}</td>
+      <td><input type="number" value="${r.horas}" min="0" step="0.5" onchange="updateRole('${cid}',${i},'horas',this.value)" style="opacity:${r.activo ? 1 : 0.4}"></td>
+      <td><input type="number" value="${r.personas}" min="0" step="1" onchange="updateRole('${cid}',${i},'personas',this.value)" style="opacity:${r.activo ? 1 : 0.4}"></td>
+      <td><input type="number" value="${r.costoHr !== null ? r.costoHr : hr.toFixed(2)}" min="0" step="10" onchange="updateRole('${cid}',${i},'costoHr',this.value)" style="opacity:${r.activo ? 1 : 0.4}"></td>
+    </tr>`;
+  });
+}
+function toggleRole(cid, i, v) { getRoles(cid)[i].activo = v; recalcular(); }
+function updateRole(cid, i, field, val) { getRoles(cid)[i][field] = field === 'horas' || field === 'personas' ? +val : +val; recalcular(); }
+function getRoles(cid) {
+  if (cid === 'roles-video') return state.rolesVideo;
+  if (cid === 'roles-foto') return state.rolesFoto;
+  return state.rolesStream;
+}
+function costoPersonal(roles) { return roles.filter(r => r.activo).reduce((s, r) => { const hr = r.costoHr !== null ? r.costoHr : costoHoraPorRol(r.nombre); return s + (r.horas * hr * r.personas); }, 0); }
+function costoEquipo(equipos) { return equipos.reduce((s, e) => s + e.costoDia * e.dias, 0); }
+
+function renderEquipoCards() {
+  const container = document.getElementById('equipo-cards');
+  if (!container) return;
+  const sections = [{title:'🎥 Video',arr:state.equipoVideo,key:'equipoVideo'},{title:'📷 Fotografía',arr:state.equipoFoto,key:'equipoFoto'},{title:'📡 Streaming',arr:state.equipoStream,key:'equipoStream'}];
+  container.innerHTML = sections.map(sec => `<div class="card"><div class="card-title">${sec.title}</div><div><div class="equip-row" style="font-size:0.65rem;color:var(--muted);padding-bottom:0.3rem;border-bottom:1px solid var(--border)"><span>Equipo</span><div style="text-align:center;width:80px">$/día</div><div style="text-align:center;width:80px">Días</div><div style="text-align:center;width:80px">Total</div></div>${sec.arr.map((e,i) => `<div class="equip-row"><span class="equip-name">${e.nombre}</span><input type="number" value="${e.costoDia}" min="0" oninput="updateEquipo('${sec.key}',${i},'costoDia',this.value)"><input type="number" value="${e.dias}" min="0" max="30" oninput="updateEquipo('${sec.key}',${i},'dias',this.value)"><span class="equip-total">${fmt(e.costoDia * e.dias)}</span></div>`).join('')}</div><div style="text-align:right;font-size:0.78rem;color:var(--muted)">Total: <span style="color:var(--accent2)">${fmt(sec.arr.reduce((s,e) => s + e.costoDia * e.dias, 0))}</span></div></div>`).join('');
+  const allEquip = [...state.equipoVideo, ...state.equipoFoto, ...state.equipoStream], desgaste = {};
+  allEquip.forEach(e => { if (!desgaste[e.nombre]) desgaste[e.nombre] = {costo:0, vidaUtil: e.vidaUtil, usos:0}; desgaste[e.nombre].costo += e.costoDia * e.dias; desgaste[e.nombre].usos += e.dias; });
+  const wearList = document.getElementById('wear-list');
+  if (wearList) {
+    wearList.innerHTML = Object.entries(desgaste).map(([nombre,d]) => { const pct = Math.min(100, Math.round((d.usos / (d.vidaUtil * 365 / 12)) * 100)); const dep = +(d.costo * (pct / 100) * 0.1).toFixed(2); return `<div style="padding:0.7rem 0;border-bottom:1px solid #1e1e2a"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:0.82rem">${nombre}</span><span style="font-size:0.72rem;color:var(--muted)">Dep. est.: <span style="color:var(--accent)">${fmt(dep)}</span></span></div><div class="wear-label"><span>Uso estimado</span><span>${pct}%</span></div><div class="wear-bar-bg"><div class="wear-bar-fill" style="width:${pct}%"></div></div></div>`; }).join('');
+  }
+}
+function updateEquipo(key, i, field, val) { state[key][i][field] = +val; renderEquipoCards(); recalcular(); }
+
+const presetsVideo = {clip:{dur:1,rodaje:1.5,edicion:5.25},entrevista:{dur:3,rodaje:4.5,edicion:15.75},institucional:{dur:4,rodaje:6,edicion:21},documental:{dur:6,rodaje:9,edicion:31.5},custom:{dur:4,rodaje:6,edicion:21}};
+const presetsFoto = {corta:{horas:1,edicion:3},evento:{horas:4,edicion:12},completo:{horas:8,edicion:24},custom:{horas:4,edicion:12}};
+function presetVideo(tipo) { document.querySelectorAll('#panel-video .preset-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); const p = presetsVideo[tipo]; setVal('v-tipo', tipo); setVal('v-duracion', p.dur); setVal('v-rodaje', p.rodaje); setVal('v-edicion', p.edicion); recalcular(); }
+function presetFoto(tipo) { document.querySelectorAll('#panel-foto .preset-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); const p = presetsFoto[tipo]; setVal('f-tipo', tipo); setVal('f-horas', p.horas); setVal('f-edicion', p.edicion); recalcular(); }
+function actualizarTipoVideo() { const tipo = getVal('v-tipo'); if (tipo !== 'custom') presetVideo(tipo); }
+function actualizarTipoFoto() { const tipo = getVal('f-tipo'); if (tipo !== 'custom') presetFoto(tipo); }
+
+function cambiarRegimen() {
+  const regimen = document.getElementById('regimen-fiscal').value;
+  const personalizadoDiv = document.getElementById('impuestos-personalizados');
+  if (personalizadoDiv) personalizadoDiv.style.display = regimen === 'personalizado' ? 'block' : 'none';
+  recalcular();
+}
+
+// ========== CONTROL DE IMPUESTOS ==========
+function toggleImpuesto(tipo) {
+  const activo = document.getElementById(`resumen-${tipo}-activo`).checked;
+  const inputPct = document.getElementById(`resumen-${tipo}-pct`);
+  if (!activo) {
+    inputPct.disabled = true;
+    inputPct.value = 0;
+  } else {
+    inputPct.disabled = false;
+    if (inputPct.value == 0) {
+      inputPct.value = tipo === 'iva' ? 16 : 10;
+    }
+  }
+  recalcular();
+}
+
+function obtenerPorcentajesImpuestos() {
+  // Usar valores del panel de resumen
+  const ivaActivo = document.getElementById('resumen-iva-activo')?.checked;
+  const isrActivo = document.getElementById('resumen-isr-activo')?.checked;
+  
+  let ivaPct = 0, isrPct = 0;
+  
+  if (ivaActivo !== undefined) {
+    ivaPct = ivaActivo ? (parseFloat(document.getElementById('resumen-iva-pct')?.value) || 0) : 0;
+    isrPct = isrActivo ? (parseFloat(document.getElementById('resumen-isr-pct')?.value) || 0) : 0;
+  }
+  
+  return { ivaPct, isrPct };
+}
+
+function recalcular() {
+  state.salarioMin = getNum('salario-min') || 315.04;
+  state.horasJornada = getNum('horas-jornada') || 8;
+  state.contingencia = getNum('contingencia');
+  state.margen = getNum('margen-ganancia');
+  
+  const cont = state.contingencia / 100;
+  const marg = state.margen / 100;
+  
+  // VIDEO
+  const vP = costoPersonal(state.rolesVideo);
+  const vE = costoEquipo(state.equipoVideo);
+  const vSub = vP + vE;
+  const vC = vSub * cont;
+  const vM = vSub + vC;
+  const vG = vM * marg;
+  const vTotal = vM + vG;
+  setText('v-costo-personal', fmt(vP));
+  setText('v-costo-equipo', fmt(vE));
+  setText('v-contingencia', fmt(vC));
+  setText('v-ganancia', fmt(vG));
+  setText('v-total', fmt(vTotal));
+  renderRoles('roles-video', state.rolesVideo);
+  
+  // FOTO
+  const fP = costoPersonal(state.rolesFoto);
+  const fE = costoEquipo(state.equipoFoto);
+  const fSub = fP + fE;
+  const fC = fSub * cont;
+  const fM = fSub + fC;
+  const fG = fM * marg;
+  const fTotal = fM + fG;
+  setText('f-costo-personal', fmt(fP));
+  setText('f-costo-equipo', fmt(fE));
+  setText('f-contingencia', fmt(fC));
+  setText('f-ganancia', fmt(fG));
+  setText('f-total', fmt(fTotal));
+  renderRoles('roles-foto', state.rolesFoto);
+  
+  // STREAMING
+  const sP = costoPersonal(state.rolesStream);
+  const sE = costoEquipo(state.equipoStream);
+  const sBase = getNum('s-base');
+  const sPlat = +getVal('s-plataformas') || 1;
+  const sGrab = getCheck('s-grabacion') ? 0.1 : 0;
+  const sSwitcher = getCheck('s-switcher') ? 1.15 : 1;
+  const platMult = sPlat === 1 ? 1 : sPlat === 2 ? 1.15 : 1.3;
+  const sSub = (sP + sE + sBase) * platMult * (1 + sGrab) * sSwitcher;
+  const sC = sSub * cont;
+  const sM = sSub + sC;
+  const sG = sM * marg;
+  const sTotal = sM + sG;
+  setText('s-costo-personal', fmt(sP));
+  setText('s-costo-equipo', fmt(sE));
+  setText('s-base-display', fmt(sBase));
+  setText('s-contingencia', fmt(sC));
+  setText('s-ganancia', fmt(sG));
+  setText('s-total', fmt(sTotal));
+  renderRoles('roles-stream', state.rolesStream);
+  
+  // SERVICIOS ACTIVOS
+  const inclVideo = getCheck('incl-video');
+  const inclFoto = getCheck('incl-foto');
+  const inclStream = getCheck('incl-stream');
+  let subtotal = 0;
+  if (inclVideo) subtotal += vTotal;
+  if (inclFoto) subtotal += fTotal;
+  if (inclStream) subtotal += sTotal;
+  
+  // IMPUESTOS
+  const { ivaPct, isrPct } = obtenerPorcentajesImpuestos();
+  const ivaVal = subtotal * (ivaPct / 100);
+  const isrVal = subtotal * (isrPct / 100);
+  const grand = subtotal + ivaVal + isrVal;
+  
+  setText('r-subtotal', fmt(subtotal));
+  setText('r-contingencia', fmt((inclVideo ? vC : 0) + (inclFoto ? fC : 0) + (inclStream ? sC : 0)));
+  setText('r-ganancia-total', fmt((inclVideo ? vG : 0) + (inclFoto ? fG : 0) + (inclStream ? sG : 0)));
+  setText('r-antes-imp', fmt(subtotal));
+  setText('r-iva', fmt(ivaVal));
+  setText('r-isr', fmt(isrVal));
+  setText('r-iva-label', `IVA (${ivaPct}%)`);
+  setText('r-isr-label', `ISR (${isrPct}%)`);
+  setText('grand-total', fmt(grand));
+  setText('grand-total-sub', `MXN · IVA ${ivaPct}% · ISR ${isrPct}%`);
+  
+  // SERVICIOS ACTIVOS HTML
+  const sa = document.getElementById('servicios-activos');
+  if (sa) {
+    sa.innerHTML = [inclVideo && {label:'Video / Producción', badge:'badge-video', amount:vTotal, detail:`Personal: ${fmt(vP)} · Equipo: ${fmt(vE)}`},
+                    inclFoto && {label:'Fotografía', badge:'badge-foto', amount:fTotal, detail:`Personal: ${fmt(fP)} · Equipo: ${fmt(fE)}`},
+                    inclStream && {label:'Streaming en Vivo', badge:'badge-stream', amount:sTotal, detail:`Personal: ${fmt(sP)} · Equipo: ${fmt(sE)}`}].filter(Boolean).map(s => `<div class="service-row"><div><div class="service-name">${s.label}</div><div class="service-detail">${s.detail}</div></div><span class="service-badge ${s.badge}">${s.badge.replace('badge-','')}</span><div class="service-amount">${fmt(s.amount)}</div></div>`).join('') || '<div style="color:var(--muted);font-size:0.8rem;padding:1rem 0">Ningún servicio seleccionado.</div>';
+  }
+  
+  // RENTABILIDAD
+  const totalCosto = (inclVideo ? vSub : 0) + (inclFoto ? fSub : 0) + (inclStream ? sSub : 0);
+  const profitPct = totalCosto > 0 ? ((subtotal - totalCosto) / subtotal * 100) : 0;
+  const profitStatus = profitPct >= 25 ? 'ok' : profitPct >= 10 ? 'warn' : 'bad';
+  const profitMsg = profitPct >= 25 ? 'Margen saludable' : profitPct >= 10 ? 'Margen aceptable' : 'Margen bajo - revisar';
+  const profitEl = document.getElementById('profit-analysis');
+  if (profitEl) {
+    profitEl.innerHTML = `<div class="profit-indicator"><div class="profit-dot profit-${profitStatus}"></div><div class="profit-text">Margen neto: <strong>${profitPct.toFixed(1)}%</strong><br><span style="color:var(--muted)">${profitMsg}</span></div></div><div style="margin-top:1rem"><div class="summary-line"><span class="label">Costo total operativo</span><span class="value">${fmt(totalCosto)}</span></div><div class="summary-line"><span class="label">Utilidad bruta</span><span class="value" style="color:var(--success)">${fmt(subtotal - totalCosto)}</span></div><div class="summary-line"><span class="label">% Margen aplicado</span><span class="value">${state.margen}%</span></div></div>`;
+  }
+  
+  renderEquipoCards();
+}
+function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
+
+// ========== EXPORTAR TXT ==========
+function exportarTXT() {
+  const cli = { nombre: getVal('cli-nombre') || 'N/D', evento: getVal('cli-evento') || 'N/D', fecha: getVal('cli-fecha') || 'N/D', lugar: getVal('cli-lugar') || 'N/D', notas: getVal('cli-notas') || '' };
+  let txt = `\n${'═'.repeat(60)}\n         PRESUPUESTO DE SERVICIOS AUDIOVISUALES\n${'═'.repeat(60)}\n\nCLIENTE       : ${cli.nombre}\nEVENTO        : ${cli.evento}\nFECHA         : ${cli.fecha}\nLUGAR         : ${cli.lugar}\n${cli.notas ? 'NOTAS         : ' + cli.notas : ''}\nFECHA EMISIÓN : ${new Date().toLocaleDateString('es-MX')}\n\n${'═'.repeat(60)}\n`;
+  
+  const inclVideo = getCheck('incl-video'), inclFoto = getCheck('incl-foto'), inclStream = getCheck('incl-stream');
+  
+  if (inclVideo) {
+    const vP = costoPersonal(state.rolesVideo), vE = costoEquipo(state.equipoVideo), vSub = vP + vE, vC = vSub * state.contingencia / 100, vM = vSub + vC, vG = vM * state.margen / 100, vT = vM + vG;
+    txt += `\n  🎥  PRODUCCIÓN DE VIDEO\n${'─'.repeat(60)}\n  Personal\n${state.rolesVideo.filter(r => r.activo).map(r => { const hr = r.costoHr !== null ? r.costoHr : costoHoraPorRol(r.nombre); return `    · ${r.nombre.padEnd(16)} ${r.horas}h × $${hr}/hr × ${r.personas}p = ${fmt(r.horas * hr * r.personas)}`; }).join('\n')}\n\n  Equipo\n${state.equipoVideo.map(e => `    · ${e.nombre.padEnd(20)} ${e.dias} día(s) × $${e.costoDia}/día = ${fmt(e.costoDia * e.dias)}`).join('\n')}\n\n  Subtotal          : ${fmt(vSub)}\n  Contingencia      : ${fmt(vC)} (${state.contingencia}%)\n  Margen ganancia   : ${fmt(vG)} (${state.margen}%)\n  TOTAL VIDEO       : ${fmt(vT)}\n${'═'.repeat(60)}\n`;
+  }
+  
+  if (inclFoto) {
+    const fP = costoPersonal(state.rolesFoto), fE = costoEquipo(state.equipoFoto), fSub = fP + fE, fC = fSub * state.contingencia / 100, fM = fSub + fC, fG = fM * state.margen / 100, fT = fM + fG;
+    txt += `\n  📷  FOTOGRAFÍA\n${'─'.repeat(60)}\n  Personal\n${state.rolesFoto.filter(r => r.activo).map(r => { const hr = r.costoHr !== null ? r.costoHr : costoHoraPorRol(r.nombre); return `    · ${r.nombre.padEnd(16)} ${r.horas}h × $${hr}/hr × ${r.personas}p = ${fmt(r.horas * hr * r.personas)}`; }).join('\n')}\n\n  Equipo\n${state.equipoFoto.map(e => `    · ${e.nombre.padEnd(20)} ${e.dias} día(s) × $${e.costoDia}/día = ${fmt(e.costoDia * e.dias)}`).join('\n')}\n\n  Subtotal          : ${fmt(fSub)}\n  Contingencia      : ${fmt(fC)} (${state.contingencia}%)\n  Margen ganancia   : ${fmt(fG)} (${state.margen}%)\n  TOTAL FOTOGRAFÍA  : ${fmt(fT)}\n${'═'.repeat(60)}\n`;
+  }
+  
+  if (inclStream) {
+    const sP = costoPersonal(state.rolesStream), sE = costoEquipo(state.equipoStream), sBase = getNum('s-base'), sPlat = +getVal('s-plataformas') || 1, sGrab = getCheck('s-grabacion') ? 0.1 : 0, sSwitcher = getCheck('s-switcher') ? 1.15 : 1, platMult = sPlat === 1 ? 1 : sPlat === 2 ? 1.15 : 1.3, sSub = (sP + sE + sBase) * platMult * (1 + sGrab) * sSwitcher, sC = sSub * state.contingencia / 100, sM = sSub + sC, sG = sM * state.margen / 100, sT = sM + sG;
+    txt += `\n  📡  STREAMING EN VIVO\n${'─'.repeat(60)}\n  Personal\n${state.rolesStream.filter(r => r.activo).map(r => { const hr = r.costoHr !== null ? r.costoHr : costoHoraPorRol(r.nombre); return `    · ${r.nombre.padEnd(16)} ${r.horas}h × $${hr}/hr × ${r.personas}p = ${fmt(r.horas * hr * r.personas)}`; }).join('\n')}\n\n  Equipo\n${state.equipoStream.map(e => `    · ${e.nombre.padEnd(20)} ${e.dias} día(s) × $${e.costoDia}/día = ${fmt(e.costoDia * e.dias)}`).join('\n')}\n\n  Costo base producción : ${fmt(sBase)}\n  Subtotal              : ${fmt(sSub)}\n  Contingencia          : ${fmt(sC)} (${state.contingencia}%)\n  Margen ganancia       : ${fmt(sG)} (${state.margen}%)\n  TOTAL STREAMING       : ${fmt(sT)}\n${'═'.repeat(60)}\n`;
+  }
+  
+  const { ivaPct, isrPct } = obtenerPorcentajesImpuestos();
+  const vT2 = inclVideo ? (() => { const vP = costoPersonal(state.rolesVideo), vE = costoEquipo(state.equipoVideo), vS = vP + vE, vC = vS * state.contingencia / 100, vM = vS + vC, vG = vM * state.margen / 100; return vM + vG; })() : 0;
+  const fT2 = inclFoto ? (() => { const fP = costoPersonal(state.rolesFoto), fE = costoEquipo(state.equipoFoto), fS = fP + fE, fC = fS * state.contingencia / 100, fM = fS + fC, fG = fM * state.margen / 100; return fM + fG; })() : 0;
+  const sT2 = inclStream ? (() => { const sP = costoPersonal(state.rolesStream), sE = costoEquipo(state.equipoStream), sBase = getNum('s-base'), sPlat = +getVal('s-plataformas') || 1, sGrab = getCheck('s-grabacion') ? 0.1 : 0, sSwitcher = getCheck('s-switcher') ? 1.15 : 1, platMult = sPlat === 1 ? 1 : sPlat === 2 ? 1.15 : 1.3, sS = (sP + sE + sBase) * platMult * (1 + sGrab) * sSwitcher, sC = sS * state.contingencia / 100, sM = sS + sC, sG = sM * state.margen / 100; return sM + sG; })() : 0;
+  const subtotal = vT2 + fT2 + sT2;
+  const ivaVal = subtotal * (ivaPct / 100);
+  const isrVal = subtotal * (isrPct / 100);
+  const grand = subtotal + ivaVal + isrVal;
+  
+  txt += `\n  RESUMEN FINAL\n${'─'.repeat(60)}\n  ${inclVideo ? `Video / Producción   : ${fmt(vT2)}` : ''}\n  ${inclFoto ? `Fotografía           : ${fmt(fT2)}` : ''}\n  ${inclStream ? `Streaming en Vivo    : ${fmt(sT2)}` : ''}\n  ${'─'.repeat(60)}\n  Subtotal             : ${fmt(subtotal)}\n  IVA (${ivaPct}%)            : ${fmt(ivaVal)}\n  ISR (${isrPct}%)            : ${fmt(isrVal)}\n${'═'.repeat(60)}\n\n  ► TOTAL FINAL        : ${fmt(grand)} MXN\n\n${'═'.repeat(60)}\n  Presupuesto generado con AVBudget\n  Herramienta gratuita creada por Vindria para todos.\n${'═'.repeat(60)}\n`.trim();
+  
+  const blob = new Blob([txt], {type: 'text/plain;charset=utf-8'}), url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = `Presupuesto_${cli.nombre.replace(/\s+/g, '_') || 'AV'}_${new Date().toISOString().slice(0,10)}.txt`; a.click(); URL.revokeObjectURL(url); showNotif('✓ Presupuesto exportado');
+}
+
+function showNotif(msg) { const n = document.getElementById('notif'); n.textContent = msg; n.classList.add('show'); setTimeout(() => n.classList.remove('show'), 3000); }
+
+// ========== LIMPIEZA ==========
+function limpiarVideo() {
+  setVal('v-duracion', 0); setVal('v-rodaje', 0); setVal('v-edicion', 0); setVal('v-dias', 0); setVal('v-tipo', 'custom');
+  state.rolesVideo.forEach(r => { r.horas = 0; r.personas = 0; r.activo = false; r.costoHr = null; });
+  state.equipoVideo.forEach(e => e.dias = 0);
+  document.querySelectorAll('#panel-video .preset-btn').forEach(b => b.classList.remove('active'));
+  recalcular(); showNotif('✓ Video resetado a 0');
+}
+function limpiarFoto() {
+  setVal('f-horas', 0); setVal('f-edicion', 0); setVal('f-dias', 0); setVal('f-fotos', 0); setVal('f-tipo', 'custom');
+  state.rolesFoto.forEach(r => { r.horas = 0; r.personas = 0; r.activo = false; r.costoHr = null; });
+  state.equipoFoto.forEach(e => e.dias = 0);
+  document.querySelectorAll('#panel-foto .preset-btn').forEach(b => b.classList.remove('active'));
+  recalcular(); showNotif('✓ Fotografía resetada a 0');
+}
+function limpiarStream() {
+  setVal('s-duracion', 0); setVal('s-base', 0); setVal('s-plataformas', '1'); setVal('s-camaras', 0);
+  const grabacionChk = document.getElementById('s-grabacion'), switcherChk = document.getElementById('s-switcher');
+  if (grabacionChk) grabacionChk.checked = false;
+  if (switcherChk) switcherChk.checked = false;
+  state.rolesStream.forEach(r => { r.horas = 0; r.personas = 0; r.activo = false; r.costoHr = null; });
+  state.equipoStream.forEach(e => e.dias = 0);
+  recalcular(); showNotif('✓ Streaming resetado a 0');
+}
+function limpiarEquipos() {
+  state.equipoVideo.forEach(e => e.dias = 0);
+  state.equipoFoto.forEach(e => e.dias = 0);
+  state.equipoStream.forEach(e => e.dias = 0);
+  renderEquipoCards(); recalcular(); showNotif('✓ Equipos resetados a 0 días');
+}
+function limpiarTodo() {
+  if (confirm('¿Limpiar todos los datos del cliente?')) {
+    ['cli-nombre', 'cli-evento', 'cli-fecha', 'cli-lugar', 'cli-notas'].forEach(id => setVal(id, ''));
+    showNotif('✓ Cliente limpiado');
+  }
+}
+
+// ========== INICIALIZACIÓN ==========
+function init() {
+  renderRoles('roles-video', state.rolesVideo);
+  renderRoles('roles-foto', state.rolesFoto);
+  renderRoles('roles-stream', state.rolesStream);
+  renderEquipoCards();
+  toggleImpuesto('iva');
+  toggleImpuesto('isr');
+  recalcular();
+}
+
+init();
+</script>
+</body>
+</html>
